@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生成绩数据可视化大屏</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <!-- ?v= 版本号: 改了 css/js 就把这里改一下, 浏览器会重新下载而不是用缓存 -->
+    <link rel="stylesheet" href="css/style.css?v=20261104a">
+</head>
+<body>
+    <!-- 顶部装饰光带 -->
+    <div class="top-line"></div>
+
+    <!-- ===== 头部 ===== -->
+    <header class="header">
+        <div class="header-left">
+            <span class="dot"></span>
+            <span class="mini">MYSQL · STUDENT_PERFORMANCE</span>
+        </div>
+        <h1>学生成绩数据可视化大屏</h1>
+        <div class="header-right">
+            <span class="clock" id="clock">--:--:--</span>
+        </div>
+        <p class="sub">数据源 UCI Student Performance · 数学 395 人 + 葡萄牙语 649 人 · Spring Boot 实时接口</p>
+    </header>
+
+    <!-- ===== KPI 指标条 ===== -->
+    <section class="kpi-row" id="kpiRow"></section>
+
+    <!-- ===== 图表区 ===== -->
+    <main class="grid">
+        <div class="panel span-3"><div class="panel-title">各科目期末均分对比</div><div id="chartAvg" class="chart"></div></div>
+        <div class="panel span-5"><div class="panel-title">成绩等级分布 (A 优秀 → W 缺考)</div><div id="chartGrade" class="chart"></div></div>
+        <div class="panel span-4"><div class="panel-title">及格率对比 (G3 ≥ 10)</div><div id="chartPass" class="chart"></div></div>
+
+        <div class="panel span-4"><div class="panel-title">分数段结构分布 (已剔除缺考)</div><div id="chartDist" class="chart"></div></div>
+        <div class="panel span-4"><div class="panel-title">性别与成绩差异</div><div id="chartSex" class="chart"></div></div>
+        <div class="panel span-4">
+            <div class="panel-title">
+                <span>影响因素联动分析</span>
+                <select id="dimSelect">
+                    <option value="studytime">每周学习时间</option>
+                    <option value="medu">母亲学历</option>
+                    <option value="fedu">父亲学历</option>
+                    <option value="goout">外出频率</option>
+                    <option value="dalc">工作日饮酒</option>
+                    <option value="walc">周末饮酒</option>
+                    <option value="romantic">恋爱状态</option>
+                    <option value="higher">是否想升学</option>
+                    <option value="failures">历史不及格次数</option>
+                    <option value="address">城市/农村</option>
+                    <option value="school">学校</option>
+                    <option value="freetime">自由时间</option>
+                    <option value="health">健康状况</option>
+                </select>
+            </div>
+            <div id="chartDim" class="chart"></div>
+        </div>
+
+        <div class="panel span-5"><div class="panel-title">学习时间 × 外出频率 → 期末均分热力</div><div id="chartHeat" class="chart"></div></div>
+        <div class="panel span-3"><div class="panel-title">缺勤次数对成绩的影响</div><div id="chartAbsence" class="chart"></div></div>
+        <div class="panel span-4"><div class="panel-title">第二期(G2) 与 期末(G3) 成绩散点</div><div id="chartScatter" class="chart"></div></div>
+    </main>
+
+    <footer class="footer">
+        <span>数据实时取自 MySQL 视图 v_student_score（1044 条记录）</span>
+        <span class="sep">|</span>
+        <span>接口 /api/stats/*</span>
+        <span class="sep">|</span>
+        <span id="status">连接中…</span>
+    </footer>
+
+    <script src="js/app.js?v=20261104a"></script>
+</body>
+</html>
