@@ -1,0 +1,25 @@
+# ---- Java / Maven ----
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# ---- 日志与临时文件 ----
+*.log
+logs/
+*.tmp
+
+# ---- Python 数据管线 ----
+data-pipeline/__pycache__/
+data-pipeline/*.pyc
+data-pipeline/output/
+# 数据库连接信息含密码, 绝不入库
+data-pipeline/db_config.json
