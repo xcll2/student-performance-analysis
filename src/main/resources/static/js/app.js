@@ -411,10 +411,18 @@ async function loadDashboard() {
 
         status.textContent = "数据已加载 · " + new Date().toLocaleTimeString("zh-CN");
         status.className = "ok";
+        loadDashboard._tries = 0;      // 成功后清零重试计数
     } catch (e) {
-        status.textContent = "加载失败: " + e.message + "（请确认后端 8080 已启动）";
         status.className = "err";
         console.error(e);
+        // 后端没就绪时每 3 秒自动重连, 最多 10 次, 启动完成后图表自动填充
+        loadDashboard._tries = (loadDashboard._tries || 0) + 1;
+        if (loadDashboard._tries <= 10) {
+            status.textContent = "后端未就绪, 3 秒后自动重连 (" + loadDashboard._tries + "/10)…";
+            setTimeout(loadDashboard, 3000);
+        } else {
+            status.textContent = "加载失败: " + e.message + "（请确认后端 8080 已启动, 刷新页面重试）";
+        }
     }
 }
 
