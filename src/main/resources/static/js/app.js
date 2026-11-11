@@ -632,4 +632,4 @@ FORM.addEventListener("click", e => { if (e.target === FORM) { closeModal(FORM);
 // 维度下拉联动只注册一次
 document.getElementById("dimSelect").addEventListener("change", e => loadDim(e.target.value));
 
-main();
+loadDashboard();
