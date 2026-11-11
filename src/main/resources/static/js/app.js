@@ -22,11 +22,18 @@ const GRADE_CN = { A: "优秀 A", B: "良好 B", C: "中等 C", D: "及格 D", F
 const GRADE_COLOR = ["#2fd6b4", "#4d9bff", "#f7c948", "#ff9f5a", "#ff6b81", "#7b86a8"];
 
 /* ---------- 工具 ---------- */
+// 带超时的请求: 防止浏览器复用失效 keep-alive 连接导致 fetch 永久挂起
 async function api(path) {
-    const res = await fetch(API_BASE + path);
-    const json = await res.json();
-    if (json.code !== 200) throw new Error(json.msg);
-    return json.data;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+        const res = await fetch(API_BASE + path, { signal: ctrl.signal });
+        const json = await res.json();
+        if (json.code !== 200) throw new Error(json.msg);
+        return json.data;
+    } finally {
+        clearTimeout(timer);
+    }
 }
 const charts = [];
 const chartMap = {};   // 按容器缓存实例, 数据变化后刷新复用, 不重复 init
@@ -433,14 +440,21 @@ async function loadDashboard() {
 
 // 写操作统一走这里: fetch + JSON 请求体, 结果 {code,msg,data} 校验
 async function apiSend(path, method, body) {
-    const res = await fetch(API_BASE + path, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: body ? JSON.stringify(body) : undefined
-    });
-    const json = await res.json();
-    if (json.code !== 200) throw new Error(json.msg || "操作失败");
-    return json.data;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+        const res = await fetch(API_BASE + path, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: body ? JSON.stringify(body) : undefined,
+            signal: ctrl.signal
+        });
+        const json = await res.json();
+        if (json.code !== 200) throw new Error(json.msg || "操作失败");
+        return json.data;
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 const mgrState = { page: 1, size: 12, total: 0, editingId: null };
