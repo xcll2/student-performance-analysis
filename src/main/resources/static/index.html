@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生成绩数据可视化大屏</title>
-    <script src="js/echarts.min.js?v=20261104b"></script>
+    <script src="js/echarts.min.js?v=20261111a"></script>
     <!-- ?v= 版本号: 改了 css/js 就把这里改一下, 浏览器会重新下载而不是用缓存 -->
-    <link rel="stylesheet" href="css/style.css?v=20261104a">
+    <link rel="stylesheet" href="css/style.css?v=20261111a">
 </head>
 <body>
     <!-- 顶部装饰光带 -->
@@ -21,6 +21,7 @@
         <h1>学生成绩数据可视化大屏</h1>
         <div class="header-right">
             <span class="clock" id="clock">--:--:--</span>
+            <button class="mgr-btn" id="mgrBtn">数据管理</button>
         </div>
         <p class="sub">数据源 UCI Student Performance · 数学 395 人 + 葡萄牙语 649 人 · Spring Boot 实时接口</p>
     </header>
@@ -71,6 +72,126 @@
         <span id="status">连接中…</span>
     </footer>
 
-    <script src="js/app.js?v=20261104b"></script>
+    <!-- ===== 数据管理弹窗(列表: 查询/删除) ===== -->
+    <div class="modal-mask" id="mgrModal">
+        <div class="mgr-panel">
+            <div class="mgr-head">
+                <div class="mgr-title">数据管理 · 成绩记录增删改查</div>
+                <button class="mgr-close" id="mgrClose">&times;</button>
+            </div>
+            <div class="mgr-toolbar">
+                <input type="text" id="qKeyword" class="q-input" placeholder="关键字: 学校/住址/监护人/职业…">
+                <select id="qCourse" class="q-select">
+                    <option value="">全部科目</option>
+                    <option value="math">数学</option>
+                    <option value="por">葡语</option>
+                </select>
+                <select id="qSex" class="q-select">
+                    <option value="">全部性别</option>
+                    <option value="F">女</option>
+                    <option value="M">男</option>
+                </select>
+                <select id="qGrade" class="q-select">
+                    <option value="">全部等级</option>
+                    <option value="A">优秀 A</option>
+                    <option value="B">良好 B</option>
+                    <option value="C">中等 C</option>
+                    <option value="D">及格 D</option>
+                    <option value="F">不及格 F</option>
+                    <option value="W">缺考 W</option>
+                </select>
+                <button class="q-btn primary" id="qSearch">查询</button>
+                <button class="q-btn" id="qReset">重置</button>
+                <button class="q-btn add" id="qAdd">+ 新增记录</button>
+            </div>
+            <div class="mgr-body">
+                <table class="mgr-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>科目</th><th>学校</th><th>性别</th><th>年龄</th>
+                            <th>G1</th><th>G2</th><th>G3</th><th>缺勤</th><th>等级</th><th>住址</th><th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mgrTbody"></tbody>
+                </table>
+            </div>
+            <div class="mgr-foot">
+                <span id="mgrTotal">共 0 条</span>
+                <div class="pager">
+                    <button class="q-btn sm" id="pgPrev">&laquo; 上一页</button>
+                    <span id="pgInfo">1 / 1</span>
+                    <button class="q-btn sm" id="pgNext">下一页 &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 新增/编辑表单弹窗 ===== -->
+    <div class="modal-mask" id="formModal">
+        <div class="form-panel">
+            <div class="mgr-head">
+                <div class="mgr-title" id="formTitle">新增成绩记录</div>
+                <button class="mgr-close" id="formClose">&times;</button>
+            </div>
+            <div class="form-body" id="formBody">
+                <label class="f-item"><span>科目 *</span>
+                    <select id="fCourse"><option value="math">数学</option><option value="por">葡语</option></select></label>
+                <label class="f-item"><span>学校 *</span>
+                    <select id="fSchool"><option value="GP">GP</option><option value="MS">MS</option></select></label>
+                <label class="f-item"><span>性别 *</span>
+                    <select id="fSex"><option value="F">女 F</option><option value="M">男 M</option></select></label>
+                <label class="f-item"><span>年龄 (15-22) *</span>
+                    <input type="number" id="fAge" min="15" max="22" value="17"></label>
+                <label class="f-item"><span>住址 *</span>
+                    <select id="fAddress"><option value="U">城市</option><option value="R">农村</option></select></label>
+                <label class="f-item"><span>家庭规模 *</span>
+                    <select id="fFamsize"><option value="LE3">≤3人</option><option value="GT3">&gt;3人</option></select></label>
+                <label class="f-item"><span>监护人 *</span>
+                    <select id="fGuardian"><option value="mother">母亲</option><option value="father">父亲</option><option value="other">其他</option></select></label>
+                <label class="f-item"><span>母亲学历 (0-4) *</span>
+                    <input type="number" id="fMedu" min="0" max="4" value="2"></label>
+                <label class="f-item"><span>父亲学历 (0-4) *</span>
+                    <input type="number" id="fFedu" min="0" max="4" value="2"></label>
+                <label class="f-item"><span>母亲职业 *</span>
+                    <select id="fMjob"><option value="at_home">居家</option><option value="health">医疗</option><option value="services">服务</option><option value="teacher">教师</option><option value="other">其他</option><option value="unknown">未知</option></select></label>
+                <label class="f-item"><span>父亲职业 *</span>
+                    <select id="fFjob"><option value="at_home">居家</option><option value="health">医疗</option><option value="services">服务</option><option value="teacher">教师</option><option value="other">其他</option><option value="unknown">未知</option></select></label>
+                <label class="f-item"><span>周学习时间 (1-4) *</span>
+                    <select id="fStudytime"><option value="1">&lt;2h</option><option value="2">2-5h</option><option value="3" selected>5-10h</option><option value="4">&gt;10h</option></select></label>
+                <label class="f-item"><span>通勤时间 (1-4) *</span>
+                    <select id="fTraveltime"><option value="1">&lt;15min</option><option value="2">15-30min</option><option value="3" selected>30-60min</option><option value="4">&gt;60min</option></select></label>
+                <label class="f-item"><span>历史不及格 (0-4) *</span>
+                    <input type="number" id="fFailures" min="0" max="4" value="0"></label>
+                <label class="f-item"><span>外出频率 (1-5) *</span>
+                    <input type="number" id="fGoout" min="1" max="5" value="3"></label>
+                <label class="f-item"><span>工作日饮酒 (1-5) *</span>
+                    <input type="number" id="fDalc" min="1" max="5" value="1"></label>
+                <label class="f-item"><span>周末饮酒 (1-5) *</span>
+                    <input type="number" id="fWalc" min="1" max="5" value="1"></label>
+                <label class="f-item"><span>自由时间 (1-5) *</span>
+                    <input type="number" id="fFreetime" min="1" max="5" value="3"></label>
+                <label class="f-item"><span>健康状况 (1-5) *</span>
+                    <input type="number" id="fHealth" min="1" max="5" value="3"></label>
+                <label class="f-item"><span>恋爱状态 *</span>
+                    <select id="fRomantic"><option value="0">否</option><option value="1">是</option></select></label>
+                <label class="f-item"><span>想升学 *</span>
+                    <select id="fHigher"><option value="1">是</option><option value="0">否</option></select></label>
+                <label class="f-item"><span>第一期 G1 (0-20) *</span>
+                    <input type="number" id="fG1" min="0" max="20" value="10"></label>
+                <label class="f-item"><span>第二期 G2 (0-20) *</span>
+                    <input type="number" id="fG2" min="0" max="20" value="10"></label>
+                <label class="f-item"><span>期末 G3 (0-20, 0=缺考) *</span>
+                    <input type="number" id="fG3" min="0" max="20" value="12"></label>
+                <label class="f-item"><span>缺勤次数 (0-93) *</span>
+                    <input type="number" id="fAbsences" min="0" max="93" value="2"></label>
+            </div>
+            <div class="form-foot">
+                <span class="form-hint">带 * 为必填; 等级/及格率等派生指标由后端自动计算</span>
+                <button class="q-btn primary" id="formSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=20261111a"></script>
 </body>
 </html>

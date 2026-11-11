@@ -29,10 +29,13 @@ async function api(path) {
     return json.data;
 }
 const charts = [];
+const chartMap = {};   // 按容器缓存实例, 数据变化后刷新复用, 不重复 init
 function reg(id) {
-    const c = echarts.init(document.getElementById(id));
-    charts.push(c);
-    return c;
+    if (!chartMap[id]) {
+        chartMap[id] = echarts.init(document.getElementById(id));
+        charts.push(chartMap[id]);
+    }
+    return chartMap[id];
 }
 window.addEventListener("resize", () => charts.forEach(c => c.resize()));
 
@@ -371,8 +374,10 @@ async function loadDim(by) {
     renderDim(await api(`/api/stats/group?by=${by}`), by);
 }
 
-/* ---------- 启动 ---------- */
-async function main() {
+/* ---------- 启动 / 刷新 ----------
+ * 数据增删改之后调用 loadDashboard() 即可让全部 KPI 和图表实时更新
+ */
+async function loadDashboard() {
     const status = document.getElementById("status");
     try {
         const [overview, grades, dist, absences, heat, sexData, page] = await Promise.all([
@@ -382,7 +387,7 @@ async function main() {
             api("/api/stats/absences"),
             api("/api/stats/heatmap"),
             api("/api/stats/group?by=sex"),
-            api("/api/students?page=1&size=2000")
+            api("/api/students?page=1&size=5000")
         ]);
 
         // 双修人数: 按 person_key 聚合, 同一人两门课都有有效成绩
@@ -399,12 +404,10 @@ async function main() {
         renderPass(overview);
         renderDistribution(dist);
         renderSex(sexData);
-        await loadDim("studytime");
         renderHeat(heat);
         renderAbsence(absences);
         renderScatter(page.records);
-
-        document.getElementById("dimSelect").addEventListener("change", e => loadDim(e.target.value));
+        await loadDim(document.getElementById("dimSelect").value);
 
         status.textContent = "数据已加载 · " + new Date().toLocaleTimeString("zh-CN");
         status.className = "ok";
@@ -414,5 +417,197 @@ async function main() {
         console.error(e);
     }
 }
+
+/* =====================================================================
+ * 数据管理模块 —— 增 / 删 / 改 / 查
+ * 列表弹窗: 分页 + 条件查询 + 删除;  表单弹窗: 新增 / 编辑
+ * ===================================================================== */
+
+// 写操作统一走这里: fetch + JSON 请求体, 结果 {code,msg,data} 校验
+async function apiSend(path, method, body) {
+    const res = await fetch(API_BASE + path, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined
+    });
+    const json = await res.json();
+    if (json.code !== 200) throw new Error(json.msg || "操作失败");
+    return json.data;
+}
+
+const mgrState = { page: 1, size: 12, total: 0, editingId: null };
+
+const MGR = document.getElementById("mgrModal");
+const FORM = document.getElementById("formModal");
+
+function openModal(el) { el.classList.add("show"); }
+function closeModal(el) { el.classList.remove("show"); }
+
+/* ----- 列表弹窗 ----- */
+async function loadMgrTable() {
+    const tbody = document.getElementById("mgrTbody");
+    const q = new URLSearchParams({
+        page: mgrState.page, size: mgrState.size,
+        course: document.getElementById("qCourse").value,
+        sex: document.getElementById("qSex").value,
+        grade: document.getElementById("qGrade").value,
+        keyword: document.getElementById("qKeyword").value.trim()
+    });
+    try {
+        const data = await api("/api/students?" + q.toString());
+        mgrState.total = data.total;
+        const rows = data.records;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="12" class="empty-row">没有符合条件的记录</td></tr>`;
+        } else {
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${CN[r.course] || r.course}</td>
+                    <td>${r.school}</td>
+                    <td>${r.sex === "F" ? "女" : "男"}</td>
+                    <td>${r.age}</td>
+                    <td>${r.g1}</td><td>${r.g2}</td>
+                    <td style="color:#6fd2ff;font-weight:600">${r.g3}</td>
+                    <td>${r.absences}</td>
+                    <td><span class="tag" style="background:rgba(47,214,180,.15);color:#37d3a4">${r.grade}</span></td>
+                    <td>${r.address === "U" ? "城市" : "农村"}</td>
+                    <td>
+                        <button class="act-btn" onclick="editRecord(${r.id})">编辑</button>
+                        <button class="act-btn del" onclick="delRecord(${r.id})">删除</button>
+                    </td>
+                </tr>`).join("");
+        }
+        document.getElementById("mgrTotal").textContent = "共 " + data.total + " 条";
+        const pages = Math.max(1, Math.ceil(data.total / mgrState.size));
+        document.getElementById("pgInfo").textContent = mgrState.page + " / " + pages;
+        document.getElementById("pgPrev").disabled = mgrState.page <= 1;
+        document.getElementById("pgNext").disabled = mgrState.page >= pages;
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="12" class="empty-row">加载失败: ${e.message}</td></tr>`;
+    }
+}
+
+// 编辑: 拉取详情填进表单
+window.editRecord = async function (id) {
+    try {
+        const r = await api("/api/students/" + id);
+        mgrState.editingId = id;
+        document.getElementById("formTitle").textContent = "编辑成绩记录 (ID: " + id + ")";
+        fillForm(r);
+        openModal(FORM);
+    } catch (e) { alert("获取详情失败: " + e.message); }
+};
+
+// 删除: 二次确认 -> 删除 -> 刷新表格与图表
+window.delRecord = async function (id) {
+    if (!confirm("确定删除这条成绩记录吗? (ID: " + id + ") 删除后不可恢复")) return;
+    try {
+        await apiSend("/api/students/" + id, "DELETE");
+        await loadMgrTable();
+        await loadDashboard();          // 大屏实时更新
+        alert("删除成功");
+    } catch (e) { alert("删除失败: " + e.message); }
+};
+
+/* ----- 表单弹窗 ----- */
+const F_IDS = ["fCourse","fSchool","fSex","fAge","fAddress","fFamsize","fGuardian","fMedu","fFedu",
+    "fMjob","fFjob","fStudytime","fTraveltime","fFailures","fGoout","fDalc","fWalc","fFreetime",
+    "fHealth","fRomantic","fHigher","fG1","fG2","fG3","fAbsences"];
+
+// 编辑时把详情写入表单
+function fillForm(r) {
+    const map = {
+        fCourse: "course", fSchool: "school", fSex: "sex", fAge: "age", fAddress: "address",
+        fFamsize: "famsize", fGuardian: "guardian", fMedu: "medu", fFedu: "fedu",
+        fMjob: "mjob", fFjob: "fjob", fStudytime: "studytime", fTraveltime: "traveltime",
+        fFailures: "failures", fGoout: "goout", fDalc: "dalc", fWalc: "walc",
+        fFreetime: "freetime", fHealth: "health", fRomantic: "romantic", fHigher: "higher",
+        fG1: "g1", fG2: "g2", fG3: "g3", fAbsences: "absences"
+    };
+    F_IDS.forEach(id => {
+        const v = r[map[id]];
+        document.getElementById(id).value = v === null || v === undefined ? "" : v;
+    });
+}
+
+// 新增时给表单填一组默认值
+function resetForm() {
+    const defaults = {
+        fCourse: "math", fSchool: "GP", fSex: "F", fAge: 17, fAddress: "U", fFamsize: "LE3",
+        fGuardian: "mother", fMedu: 2, fFedu: 2, fMjob: "other", fFjob: "other",
+        fStudytime: 3, fTraveltime: 3, fFailures: 0, fGoout: 3, fDalc: 1, fWalc: 1,
+        fFreetime: 3, fHealth: 3, fRomantic: 0, fHigher: 1, fG1: 10, fG2: 10, fG3: 12, fAbsences: 2
+    };
+    F_IDS.forEach(id => document.getElementById(id).value = defaults[id]);
+}
+
+// 读取表单 -> JSON 对象
+function readForm() {
+    const o = {};
+    F_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        const key = id.slice(1).replace(/^./, ch => ch.toLowerCase()); // fG1 -> g1
+        o[key] = el.tagName === "SELECT" ? el.value : el.value === "" ? null : +el.value;
+    });
+    // select 的值转数字(除职业/学校等字符串枚举)
+    ["age","medu","fedu","studytime","traveltime","failures","goout","dalc","walc",
+     "freetime","health","romantic","higher","g1","g2","g3","absences"]
+        .forEach(k => o[k] = o[k] === null ? null : +o[k]);
+    return o;
+}
+
+document.getElementById("formSave").addEventListener("click", async () => {
+    const body = readForm();
+    try {
+        if (mgrState.editingId) {
+            await apiSend("/api/students/" + mgrState.editingId, "PUT", body);
+            alert("修改成功");
+        } else {
+            await apiSend("/api/students", "POST", body);
+            alert("新增成功");
+        }
+        closeModal(FORM);
+        mgrState.editingId = null;
+        await loadMgrTable();
+        await loadDashboard();          // 大屏实时更新
+    } catch (e) { alert("保存失败: " + e.message); }
+});
+
+/* ----- 弹窗事件绑定(只绑一次) ----- */
+document.getElementById("mgrBtn").addEventListener("click", () => {
+    mgrState.page = 1;
+    openModal(MGR);
+    loadMgrTable();
+});
+document.getElementById("mgrClose").addEventListener("click", () => closeModal(MGR));
+document.getElementById("formClose").addEventListener("click", () => { closeModal(FORM); mgrState.editingId = null; });
+document.getElementById("qSearch").addEventListener("click", () => { mgrState.page = 1; loadMgrTable(); });
+document.getElementById("qKeyword").addEventListener("keydown", e => {
+    if (e.key === "Enter") { mgrState.page = 1; loadMgrTable(); }
+});
+document.getElementById("qReset").addEventListener("click", () => {
+    document.getElementById("qKeyword").value = "";
+    document.getElementById("qCourse").value = "";
+    document.getElementById("qSex").value = "";
+    document.getElementById("qGrade").value = "";
+    mgrState.page = 1;
+    loadMgrTable();
+});
+document.getElementById("qAdd").addEventListener("click", () => {
+    mgrState.editingId = null;
+    document.getElementById("formTitle").textContent = "新增成绩记录";
+    resetForm();
+    openModal(FORM);
+});
+document.getElementById("pgPrev").addEventListener("click", () => { if (mgrState.page > 1) { mgrState.page--; loadMgrTable(); } });
+document.getElementById("pgNext").addEventListener("click", () => { mgrState.page++; loadMgrTable(); });
+
+// 点击遮罩空白处关闭
+MGR.addEventListener("click", e => { if (e.target === MGR) closeModal(MGR); });
+FORM.addEventListener("click", e => { if (e.target === FORM) { closeModal(FORM); mgrState.editingId = null; } });
+
+// 维度下拉联动只注册一次
+document.getElementById("dimSelect").addEventListener("change", e => loadDim(e.target.value));
 
 main();
