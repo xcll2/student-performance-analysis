@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学习时间与考试成绩关系分析 · 可视化大屏 · 杨佳乐</title>
+<link rel="stylesheet" href="css/member-c.css?v=20261112a">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="title">学习时间与考试成绩关系分析 · 可视化大屏</div>
+
+    <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="math">数学课</button>
+        <button class="tab" data-tab="por">葡萄牙语课</button>
+        <button class="tab" data-tab="manage">学生数据管理</button>
+        <a class="tab" href="portfolio.html" style="text-decoration:none">作品集</a>
+    </div>
+
+    <div class="sub">
+        <span>每 30 秒自动刷新 · 最后更新：<b id="upd">--:--:--</b></span>
+        <span class="help" title="数据来自 MySQL 视图 v_student_score，经 Spring Boot 统计接口下发">?</span>
+    </div>
+</header>
+
+<div class="wrap" id="wrap">
+
+    <div class="col col-left">
+
+    <!-- 每周学习时长分布 -->
+    <section class="panel a-donut">
+        <div class="panel-head"><h3>每周学习时长分布</h3><span class="u">单位：人</span></div>
+        <div class="chart" id="c_donut"></div>
+    </section>
+
+    <!-- 四项 KPI -->
+    <div class="kpi-box a-kpi">
+        <div class="kpi">
+            <div class="k-value" id="k1">--</div>
+            <div class="k-label">学生总数</div>
+        </div>
+        <div class="kpi">
+            <div class="k-value" id="k2">--</div>
+            <div class="k-label">期末平均分</div>
+        </div>
+        <div class="kpi">
+            <div class="k-value" id="k3">--</div>
+            <div class="k-label">及格率(%)</div>
+        </div>
+        <div class="kpi">
+            <div class="k-value" id="k4">--</div>
+            <div class="k-label">平均学习时长档</div>
+        </div>
+    </div>
+
+    <!-- 各时长组平均分与及格率 -->
+    <section class="panel a-rate">
+        <div class="panel-head"><h3>各时长组平均分与及格率</h3><span class="u">单位：分 / %</span></div>
+        <div class="chart" id="c_rate"></div>
+    </section>
+
+    <!-- 期末成绩分段分布 -->
+    <section class="panel a-seg">
+        <div class="panel-head"><h3>期末成绩分段分布</h3><span class="u">单位：人</span></div>
+        <div class="chart" id="c_seg"></div>
+    </section>
+    </div>
+
+    <div class="col col-mid">
+
+    <!-- 学习时长 vs 期末成绩 散点 -->
+    <section class="panel a-scatter">
+        <div class="panel-head"><h3>学习时长与 期末成绩 关系（散点）</h3><span class="u">单条记录 · 横向抖动显示重叠点</span></div>
+        <div class="chart" id="c_scatter"></div>
+    </section>
+    </div>
+
+    <div class="col col-right">
+
+    <!-- 数学课 vs 葡语课 平均分对比 -->
+    <section class="panel a-cmp">
+        <div class="panel-head"><h3>数学课 vs 葡萄牙语课 平均分对比</h3><span class="u">单位：分</span></div>
+        <div class="chart" id="c_cmp"></div>
+    </section>
+    </div>
+
+    <!-- ============ 学生数据管理 ============ -->
+    <section class="mgr">
+        <div class="mgr-bar">
+            <h3>学生数据管理</h3>
+            <input id="q" placeholder="关键字：学校 / 住址 / 监护人 / 职业 / 科目" style="width:260px">
+            <select id="fCourse">
+                <option value="">全部科目</option>
+                <option value="math">数学课</option>
+                <option value="por">葡语课</option>
+            </select>
+            <select id="fGrade">
+                <option value="">全部等级</option>
+                <option>A</option><option>B</option><option>C</option>
+                <option>D</option><option>F</option><option>W</option>
+            </select>
+            <button class="btn primary" id="btnSearch">查询</button>
+            <button class="btn" id="btnReset">重置</button>
+            <a class="btn" href="index.html#mgr" style="text-decoration:none">新增 / 编辑记录</a>
+            <span class="mgr-count" id="mgrCount">--</span>
+        </div>
+        <div class="table-wrap">
+            <table class="grid">
+                <thead>
+                <tr>
+                    <th>ID</th><th>科目</th><th>学校</th><th>性别</th><th>年龄</th><th>住址</th>
+                    <th>学习档</th><th>不及格</th><th>缺勤</th>
+                    <th>G1</th><th>G2</th><th>G3</th><th>等级</th><th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="mgrBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<div class="mgr-msg" id="msg"></div>
+
+<script src="js/echarts.min.js"></script>
+<script src="js/member-c.js?v=20261112a"></script>
+</body>
+</html>

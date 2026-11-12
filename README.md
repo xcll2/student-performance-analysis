@@ -4,6 +4,21 @@
 
 > 一条完整的数据链路：`Excel/CSV → pandas 清洗 → MySQL → Spring Boot REST API → ECharts 大屏`
 
+## 三个作品（同一套数据与接口，三种分析视角）
+
+| 作品 | 负责人 | 页面 | 说明 |
+|---|---|---|---|
+| 图一 | 袁正勇 | `member-a.html` | 六页导航式分析大屏：全局概览 / 学习时间专题 / 成绩分布 / 影响因素 / 三维分布 / 数据明细，14 图 + 明细表，支持键盘翻页 |
+| 图二 | 熊闯 | `index.html` | 一屏式综合大屏：6 KPI + 9 图 + 数据管理（增删改查），数据变更后图表即时刷新 |
+| 图三 | 杨佳乐 | `member-c.html` | 课程标签式大屏：数学课 / 葡语课 / 学生数据管理三标签切换，4 KPI + 5 图，30 秒自动刷新 |
+| 入口 | — | `portfolio.html` | 作品集导航页，三块大屏互相跳转 |
+
+配套文档见 [`docs/`](docs/)：
+
+- [01-三张图分析.md](docs/01-三张图分析.md)：逐图拆解指标、图表类型、配色、布局、交互与需实现的视觉效果
+- [02-数据来源与字段说明.md](docs/02-数据来源与字段说明.md)：数据来源、33 字段、5 个派生字段、库表结构与口径说明
+- [03-功能清单与模块对应关系.md](docs/03-功能清单与模块对应关系.md)：功能清单、模块与三张图的对应矩阵、运行与自测记录
+
 ## 功能特性
 
 - **数据预处理**：类型转换、缺考标记、派生指标（及格率/等级/进步幅度）、两科目合并、跨科目同人识别
@@ -35,7 +50,14 @@ student-performance-backend/
 │   │   └── pojo/                       StudentScore / ScoreStats / HeatStat
 │   └── resources/
 │       ├── application.yml             数据源与 MP 配置
-│       └── static/                     ← 大屏页面（index.html + css + js）
+│       └── static/                     ← 前端页面
+│           ├── portfolio.html          作品集入口
+│           ├── index.html              图二 · 综合大屏（熊闯）
+│           ├── member-a.html           图一 · 六页导航大屏（袁正勇）
+│           ├── member-c.html           图三 · 课程标签大屏（杨佳乐）
+│           ├── css/                    style.css / member-a.css / member-c.css
+│           └── js/                     app.js / member-a.js / member-c.js / echarts.min.js
+├── docs/                               ← 交付文档（三张图分析 / 字段说明 / 功能清单）
 └── data-pipeline/                      ← 数据管线（Python）
     ├── preprocess.py                   清洗 + 派生字段 + 合并
     ├── load_data.py                    写入 MySQL（事务保护，可重复执行）
@@ -90,7 +112,14 @@ DB_PASSWORD=你的密码 mvn spring-boot:run
 
 ### 4. 打开大屏
 
-浏览器访问 **http://localhost:8080/index.html**
+浏览器访问：
+
+| 页面 | 地址 |
+|---|---|
+| 作品集入口 | http://localhost:8080/portfolio.html |
+| 图一 · 袁正勇 | http://localhost:8080/member-a.html |
+| 图二 · 熊闯 | http://localhost:8080/index.html |
+| 图三 · 杨佳乐 | http://localhost:8080/member-c.html |
 
 ## 接口一览
 
@@ -103,7 +132,13 @@ DB_PASSWORD=你的密码 mvn spring-boot:run
 | GET | `/api/stats/distribution` | 分数段结构（0-5 / 6-9 / 10-13 / 14-16 / 17-20） |
 | GET | `/api/stats/absences` | 缺勤区间对均分与及格率的影响 |
 | GET | `/api/stats/heatmap` | 学习时间 × 外出频率 → 均分热力 |
-| GET | `/api/stats/group?by=studytime` | 分组分析，`by` 支持 13 个维度（白名单校验，防注入） |
+| GET | `/api/stats/group?by=studytime` | 分组分析，`by` 支持 15 个维度（白名单校验，防注入） |
+| GET | `/api/dash/profile?course=math` | **分科画像**：KPI + 4 段/5 段分布 + 时长分布 + 时长×科目均分 + 等级×科目 |
+| GET | `/api/dash/corr` | **皮尔逊相关系数**：10 个变量与 G3 的相关性（应用层计算） |
+| GET | `/api/dash/all` | 全量明细，供散点图 / 气泡图 / 明细表使用 |
+| POST | `/api/students` | 新增一条成绩记录（student + score 双表事务写入） |
+| PUT | `/api/students/{id}` | 更新记录（派生字段服务端重算） |
+| DELETE | `/api/students/{id}` | 删除记录（学生无剩余成绩时连带删除） |
 
 `by` 可选值：`sex` `address` `school` `studytime` `traveltime` `failures` `goout` `dalc` `walc` `freetime` `health` `romantic` `higher` `medu` `fedu`
 

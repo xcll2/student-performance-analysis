@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>项目作品集 · 学生成绩数据可视化分析平台</title>
+<style>
+    :root {
+        --bg: #060d19;
+        --panel: #0b1728;
+        --line: rgba(58, 124, 165, 0.24);
+        --txt: #e6f1f7;
+        --txt-2: #8fa8bd;
+        --txt-3: #5d7691;
+        --teal: #2fb0a6;
+        --teal-2: #4fd1c5;
+        --blue: #4a8fd6;
+        --green: #35c48e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        min-height: 100vh;
+        background:
+            radial-gradient(1100px 520px at 15% -10%, rgba(47, 176, 166, 0.12), transparent 62%),
+            radial-gradient(900px 480px at 92% 108%, rgba(74, 143, 214, 0.12), transparent 62%),
+            var(--bg);
+        color: var(--txt);
+        font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+        padding: 34px 40px 46px;
+    }
+    header { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+    h1 { font-size: 26px; letter-spacing: 1px; }
+    .tag {
+        font-size: 11px; color: var(--teal-2);
+        border: 1px solid rgba(47, 176, 166, 0.35);
+        background: rgba(47, 176, 166, 0.08);
+        border-radius: 4px; padding: 3px 9px; margin-bottom: 6px;
+    }
+    .lead { color: var(--txt-2); font-size: 12.5px; line-height: 1.9; margin: 10px 0 26px; max-width: 980px; }
+    .lead b { color: #cfe6f4; font-weight: 600; }
+
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(13, 28, 49, 0.86), rgba(8, 18, 33, 0.86));
+        padding: 18px 20px 20px;
+        display: flex; flex-direction: column;
+        text-decoration: none; color: inherit;
+        transition: 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+        background: var(--teal); opacity: 0.9;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(79, 209, 197, 0.55); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45); }
+    .who { font-size: 11px; color: var(--txt-3); letter-spacing: 1.2px; }
+    .card h2 { font-size: 17px; margin: 6px 0 10px; letter-spacing: 0.5px; }
+    .card p { font-size: 11.5px; line-height: 1.85; color: var(--txt-2); flex: 1; }
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 16px; }
+    .meta span {
+        font-size: 10px; color: #9fc0d4;
+        background: rgba(74, 143, 214, 0.13);
+        border: 1px solid rgba(74, 143, 214, 0.25);
+        border-radius: 3px; padding: 2px 7px;
+    }
+    .go {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 12px; color: var(--teal-2);
+        border-top: 1px solid rgba(58, 124, 165, 0.18);
+        padding-top: 12px;
+    }
+    .foot {
+        margin-top: 26px; padding-top: 14px;
+        border-top: 1px solid rgba(58, 124, 165, 0.16);
+        display: flex; gap: 26px; flex-wrap: wrap;
+        font-size: 11px; color: var(--txt-3);
+    }
+    .foot b { color: #b9d3e4; font-weight: 600; }
+    @media (max-width: 1000px) { .cards { grid-template-columns: 1fr; } body { padding: 22px; } }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>项目作品集 · 学生成绩数据可视化分析平台</h1>
+    <span class="tag">数据分析与可视化企业工学结合项目实践</span>
+</header>
+
+<p class="lead">
+    同一份数据、同一套后端接口，三位成员各自独立完成一块可视化大屏，分别回答「整体学情如何」「多维度如何交叉」「学习时间究竟带来什么」三类问题。
+    数据为 <b>UCI Student Performance</b> 公开数据集，<b>1044 条</b>成绩记录（数学 395 条、葡语 649 条、33 个字段），经 pandas 清洗后写入 MySQL，
+    由 Spring Boot 提供 <b>11 个</b>统计与维护接口，前端用 ECharts 5.5 渲染。
+</p>
+
+<div class="cards">
+    <a class="card" href="member-a.html">
+        <div class="who">作品一 · 袁正勇</div>
+        <h2>学习时间与考试成绩关系分析</h2>
+        <p>六页导航式分析大屏：全局概览 → 学习时间专题 → 成绩分布 → 影响因素 → 三维分布 → 数据明细。
+           每页独立成图，支持键盘左右键与 1-6 数字键直达，适合答辩时按叙事顺序逐页讲解。</p>
+        <div class="meta">
+            <span>6 页 · 14 图</span><span>KPI 6 项</span><span>皮尔逊相关</span><span>明细可导出</span>
+        </div>
+        <div class="go">进入作品 →</div>
+    </a>
+
+    <a class="card" href="index.html">
+        <div class="who">作品二 · 熊闯</div>
+        <h2>学生成绩综合可视化大屏</h2>
+        <p>一屏承载全部核心指标：均分、及格率、等级分布、分数段结构、性别差异、维度联动、缺勤影响、热力矩阵与成绩散点，
+           右上角「数据管理」提供新增 / 编辑 / 删除 / 关键字查询，改动后图表即时刷新。</p>
+        <div class="meta">
+            <span>一屏 9 图</span><span>11 图联动</span><span>增删改查</span><span>实时刷新</span>
+        </div>
+        <div class="go">进入作品 →</div>
+    </a>
+
+    <a class="card" href="member-c.html">
+        <div class="who">作品三 · 杨佳乐</div>
+        <h2>课程标签式学习时长大屏</h2>
+        <p>以「数学课 / 葡萄牙语课 / 学生数据管理」三个标签组织页面：切换课程时 KPI 与全部图表同步换源，
+           学习时长分布、成绩散点、分段结构、两课程对比一屏对照，30 秒自动刷新。</p>
+        <div class="meta">
+            <span>3 标签切换</span><span>5 图 + 4 KPI</span><span>散点抖动</span><span>30s 自动刷新</span>
+        </div>
+        <div class="go">进入作品 →</div>
+    </a>
+</div>
+
+<div class="foot">
+    <span>后端：Spring Boot 2.7.18 + MyBatis-Plus　<b>http://localhost:8080</b></span>
+    <span>数据库：MySQL 8.3 · <b>v_student_score</b> 视图</span>
+    <span>前端：HTML + ECharts 5.5（本地化，不依赖 CDN）</span>
+    <span>数据：1044 条 / 33 字段 / 662 名独立学生</span>
+</div>
+
+</body>
+</html>

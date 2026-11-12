@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学习时间与考试成绩关系分析 · 袁正勇</title>
+<link rel="stylesheet" href="css/member-a.css?v=20261112a">
+</head>
+<body>
+
+<!-- ================= 顶栏 ================= -->
+<header class="topbar">
+    <div class="brand">
+        <div class="logo">学</div>
+        <div>
+            <h1>学习时间与考试成绩关系分析</h1>
+            <p>STUDENT PERFORMANCE ANALYTICS</p>
+        </div>
+    </div>
+    <div class="page-tag" id="pageTag">01 / 06　全局概览</div>
+    <div class="top-right">
+        <span><span class="dot-live"></span>更新于 <b id="upd" style="color:#cfe6f4;font-weight:500">--:--:--</b></span>
+        <span class="clock" id="clock">--:--:--</span>
+        <span id="today">--</span>
+        <button class="btn" id="btnRefresh">⟳ 刷新</button>
+        <button class="btn" id="btnFull">⛶ 全屏</button>
+        <a class="btn" href="portfolio.html" style="text-decoration:none">作品集</a>
+    </div>
+</header>
+
+<main class="shell">
+    <!-- ================= 左侧章节导航 ================= -->
+    <nav class="side" id="nav">
+        <div class="nav-item active" data-page="0"><i>01</i><span>全局概览</span></div>
+        <div class="nav-item" data-page="1"><i>02</i><span>学习时间专题</span></div>
+        <div class="nav-item" data-page="2"><i>03</i><span>成绩分布</span></div>
+        <div class="nav-item" data-page="3"><i>04</i><span>影响因素</span></div>
+        <div class="nav-item" data-page="4"><i>05</i><span>三维分布</span></div>
+        <div class="nav-item" data-page="5"><i>06</i><span>数据明细</span></div>
+    </nav>
+
+    <div class="stage">
+
+        <!-- ============ 01 全局概览 ============ -->
+        <section class="page active" id="page0">
+            <div class="page-head">
+                <h2>全局概览</h2>
+                <p>数据集整体表现、学习时间分布与及格情况</p>
+                <div class="head-right">SCREEN 01 / 06</div>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi k-teal">
+                    <div class="k-label"><em></em>样本学生数</div>
+                    <div class="k-value" id="k1">--</div>
+                    <div class="k-sub">数学课清洗后有效记录</div>
+                </div>
+                <div class="kpi k-teal">
+                    <div class="k-label"><em style="background:#4fd1c5"></em>期末平均分 G3</div>
+                    <div class="k-value" id="k2">--<small>分</small></div>
+                    <div class="k-sub">满分 20 分</div>
+                </div>
+                <div class="kpi k-teal">
+                    <div class="k-label"><em style="background:#4fd1c5"></em>及格率</div>
+                    <div class="k-value" id="k3">--<small>%</small></div>
+                    <div class="k-sub">G3 ≥ 10 分计为及格</div>
+                </div>
+                <div class="kpi k-teal">
+                    <div class="k-label"><em style="background:#4fd1c5"></em>平均学习时间档</div>
+                    <div class="k-value" id="k4">--<small>档</small></div>
+                    <div class="k-sub">1 档 &lt;2h ~ 4 档 &gt;10h</div>
+                </div>
+                <div class="kpi k-orange">
+                    <div class="k-label"><em style="background:#f0a860"></em>缺勤异常人数</div>
+                    <div class="k-value" id="k5">--<small>人</small></div>
+                    <div class="k-sub">缺勤次数 &gt; 30 次</div>
+                </div>
+                <div class="kpi k-blue">
+                    <div class="k-label"><em style="background:#7cb6ea"></em>两课程分差</div>
+                    <div class="k-value" id="k6">--<small>分</small></div>
+                    <div class="k-sub">葡语均分高于数学</div>
+                </div>
+            </div>
+
+            <div class="grid-2-1">
+                <div class="panel">
+                    <div class="panel-head"><h3>学习时间档 × 平均成绩</h3><span class="ph-unit">单位：分</span></div>
+                    <div class="chart" id="c_study_avg"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>成绩档次构成</h3><span class="ph-unit">数学课</span></div>
+                    <div class="chart" id="c_seg5"></div>
+                </div>
+            </div>
+
+            <div class="findings">
+                <div class="finding">
+                    <div class="f-tag">FINDING · 01</div>
+                    <h4>学习时间与成绩并非线性</h4>
+                    <p id="fd1">3 档（5-10h）学生平均分达 11.40 分；但 4 档（&gt;10h）回落至 11.26 分，呈明显收益递减。</p>
+                </div>
+                <div class="finding">
+                    <div class="f-tag">FINDING · 02</div>
+                    <h4>不及格经历是最强负向因素</h4>
+                    <p id="fd2">有不及格记录的学生平均分 7.27 分，比无记录者低 3.98 分，影响力超过家庭背景与饮酒习惯。</p>
+                </div>
+                <div class="finding">
+                    <div class="f-tag">FINDING · 03</div>
+                    <h4>两门课程存在系统性差异</h4>
+                    <p id="fd3">葡语课平均分 11.91 分、及格率 84.6%，明显高于数学课，同一学生的数学成绩平均低 1.49 分。</p>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>数据来源：UCI Machine Learning Repository · Student Performance（数学 395 条 / 葡语 649 条）</span>
+                <span class="dots" id="dots1"></span>
+                <span class="hint">← → 切换页面　·　1-6 直达</span>
+            </div>
+        </section>
+
+        <!-- ============ 02 学习时间专题 ============ -->
+        <section class="page" id="page1">
+            <div class="page-head">
+                <h2>学习时间专题</h2>
+                <p>投入时长、缺勤行为与成绩的关联结构</p>
+                <div class="head-right">SCREEN 02 / 06</div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:10px">
+                <div class="panel">
+                    <div class="panel-head"><h3>每周学习时长人数分布</h3><span class="ph-unit">单位：人</span></div>
+                    <div class="chart" id="c_study_cnt"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>各时长组平均分与及格率</h3><span class="ph-unit">单位：分 / %</span></div>
+                    <div class="chart" id="c_study_rate"></div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-head"><h3>缺勤区间 × 及格率</h3><span class="ph-unit">剔除缺考</span></div>
+                    <div class="chart" id="c_absent"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>学习时间 × 外出频率 均分矩阵</h3><span class="ph-unit">单位：分</span></div>
+                    <div class="chart" id="c_heat"></div>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>口径：学习时长 1 档 &lt;2h、2 档 2-5h、3 档 5-10h、4 档 &gt;10h；外出频率 1 很低 ~ 5 很高</span>
+                <span class="dots" id="dots2"></span>
+            </div>
+        </section>
+
+        <!-- ============ 03 成绩分布 ============ -->
+        <section class="page" id="page2">
+            <div class="page-head">
+                <h2>成绩分布</h2>
+                <p>等级构成、分数段结构与分科及格情况</p>
+                <div class="head-right">SCREEN 03 / 06</div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:10px">
+                <div class="panel">
+                    <div class="panel-head"><h3>等级分布（A ~ W 缺考）</h3><span class="ph-unit">按科目堆叠</span></div>
+                    <div class="chart" id="c_grade"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>分数段分布</h3><span class="ph-unit">含缺考计入 0-4 分</span></div>
+                    <div class="chart" id="c_seg4"></div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-head"><h3>分科及格率对比</h3><span class="ph-unit">G3 ≥ 10</span></div>
+                    <div class="chart" id="c_pass"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>等级占比（数学课）</h3><span class="ph-unit">玫瑰图</span></div>
+                    <div class="chart" id="c_rose"></div>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>等级规则：A ≥ 16、B ≥ 14、C ≥ 12、D ≥ 10、F &lt; 10、W = 缺考</span>
+                <span class="dots" id="dots3"></span>
+            </div>
+        </section>
+
+        <!-- ============ 04 影响因素 ============ -->
+        <section class="page" id="page3">
+            <div class="page-head">
+                <h2>影响因素</h2>
+                <p>皮尔逊相关系数与关键维度的分组对比</p>
+                <div class="head-right">SCREEN 04 / 06</div>
+            </div>
+
+            <div class="grid-1-2" style="margin-bottom:10px">
+                <div class="panel">
+                    <div class="panel-head"><h3>与期末成绩的相关系数</h3><span class="ph-unit">n = 1044</span></div>
+                    <div class="chart" id="c_corr"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>既往不及格次数 × 平均分</h3><span class="ph-unit">单位：分</span></div>
+                    <div class="chart" id="c_fail"></div>
+                </div>
+            </div>
+
+            <div class="grid-1-2">
+                <div class="panel">
+                    <div class="panel-head"><h3>父母学历 × 平均分</h3><span class="ph-unit">0 无 ~ 4 高</span></div>
+                    <div class="chart" id="c_edu"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>性别 · 住址 · 家庭规模 · 升学意愿 对比</h3><span class="ph-unit">单位：分</span></div>
+                    <div class="chart" id="c_dims"></div>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>相关系数为皮尔逊 r，正值表示同向变化；灰色虚线为 |r| = 0.3 参考线</span>
+                <span class="dots" id="dots4"></span>
+            </div>
+        </section>
+
+        <!-- ============ 05 三维分布 ============ -->
+        <section class="page" id="page4">
+            <div class="page-head">
+                <h2>三维分布</h2>
+                <p>成绩、缺勤与投入时长的联合结构</p>
+                <div class="head-right">SCREEN 05 / 06</div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:10px">
+                <div class="panel">
+                    <div class="panel-head"><h3>缺勤次数 × 期末成绩（气泡 = 学习时长档）</h3><span class="ph-unit">单条记录</span></div>
+                    <div class="chart" id="c_bubble"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>第二次平时成绩 G2 × 期末成绩 G3</h3><span class="ph-unit">r = 0.911</span></div>
+                    <div class="chart" id="c_scatter"></div>
+                </div>
+            </div>
+
+            <div class="grid-2-1">
+                <div class="panel">
+                    <div class="panel-head"><h3>学习时间 × 外出频率 均分矩阵</h3><span class="ph-unit">单位：分</span></div>
+                    <div class="chart" id="c_heat2"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head"><h3>关键结论</h3></div>
+                    <div style="padding:10px 14px;font-size:11px;line-height:1.85;color:#9fb7c9">
+                        <p style="color:#e8f6fb;margin-bottom:6px">缺勤呈阈值效应</p>
+                        <p>缺勤与 G3 的线性相关系数仅 −0.046，但缺勤 11 次以上及格率从 78% 跌到 66%，20 次以上只剩 52%。</p>
+                        <p style="color:#e8f6fb;margin:10px 0 6px">投入存在边际收益递减</p>
+                        <p>学习时长从 1 档升到 3 档，均分提升 1.9 分；继续加到 4 档反而回落 0.2 分。</p>
+                        <p style="color:#e8f6fb;margin:10px 0 6px">G2 是最强先行指标</p>
+                        <p>G2 与 G3 的相关系数 0.911，用期中成绩做期末预警比用家庭背景可靠得多。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>气泡大小对应学习时长档（1~4 档）；散点图按科目着色，数学 395 点 / 葡语 649 点</span>
+                <span class="dots" id="dots5"></span>
+            </div>
+        </section>
+
+        <!-- ============ 06 数据明细 ============ -->
+        <section class="page" id="page5">
+            <div class="page-head">
+                <h2>数据明细</h2>
+                <p>原始记录检索、核对与导出</p>
+                <div class="head-right">SCREEN 06 / 06</div>
+            </div>
+
+            <div class="panel" style="flex:1">
+                <div class="toolbar">
+                    <input id="q" placeholder="搜索学校 / 住址 / 监护人 / 科目" style="width:230px">
+                    <select id="selCourse">
+                        <option value="">全部科目</option>
+                        <option value="math">数学课</option>
+                        <option value="por">葡语课</option>
+                    </select>
+                    <select id="selGrade">
+                        <option value="">全部等级</option>
+                        <option>A</option><option>B</option><option>C</option>
+                        <option>D</option><option>F</option><option>W</option>
+                    </select>
+                    <button class="btn" id="btnQuery">查询</button>
+                    <button class="btn" id="btnExport">导出 CSV</button>
+                    <span class="count" id="tblCount">--</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="detail">
+                        <thead>
+                        <tr>
+                            <th>ID</th><th>科目</th><th>学校</th><th>性别</th><th>年龄</th><th>住址</th>
+                            <th>学习档</th><th>不及格次数</th><th>缺勤</th>
+                            <th>G1</th><th>G2</th><th>G3</th><th>等级</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="footbar">
+                <span>数据实时取自 MySQL 视图 v_student_score，可在此核对任一条记录的派生字段</span>
+                <span class="dots" id="dots6"></span>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/echarts.min.js"></script>
+<script src="js/member-a.js?v=20261112a"></script>
+</body>
+</html>
